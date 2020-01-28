@@ -1,10 +1,14 @@
 package com.olux.photag
 
 import android.os.Bundle
+import android.util.Log
 import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import com.olux.photag.models.Photo
+import com.olux.photag.repositories.ApiClient
+import com.olux.photag.repositories.MyCallback
 
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -14,6 +18,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+
+        ApiClient.photoService.getPhotos()
+            .enqueue(MyCallback<List<Photo>> {
+                Log.d("test", "photo list size: "+it.size)
+            })
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
