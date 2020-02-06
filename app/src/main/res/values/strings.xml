@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">photag</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_edit_photo">EditPhotoActivity</string>
+    <string name="choose_photo">Choose photo</string>
 </resources>
