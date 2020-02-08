@@ -1,10 +1,11 @@
-package com.olux.photag.ui.editPhoto
+package com.olux.photag.ui.home
 
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,18 +18,17 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 
 
-class EditPhotoViewModel : ViewModel() {
-    val photo = MutableLiveData<Photo>()
+class MainViewModel : ViewModel() {
+    val photos = MutableLiveData<List<Photo>>()
+    val isLoading = MutableLiveData(false)
     val isPhotoUploading = MutableLiveData(false)
 
-    fun initPhoto(id: String?) {
-        if (id == null) {
-            photo.value = Photo()
-        } else {
-            ApiClient.photoService.getPhoto(id).enqueue(MyCallback<Photo> {
-                photo.value = it
-            })
-        }
+    fun retrievePhotoList() {
+        isLoading.value = true
+        ApiClient.photoService.getPhotos().enqueue(MyCallback<List<Photo>> {
+            photos.value = it
+            isLoading.value = false
+        })
     }
 
     fun doUploadPhoto(context: Context, uri: Uri) {
@@ -42,19 +42,17 @@ class EditPhotoViewModel : ViewModel() {
 
         ApiClient.photoService.uploadPhoto(part).enqueue(MyCallback<Photo> {
             isPhotoUploading.value = false
-            photo.value = it
+            photos.value = mutableListOf(it).plus(photos.value!!)
         })
     }
 
-    fun onSelectPhoto(view: View) = (view.context as Activity).startActivityForResult(
-        Intent(
-            Intent.ACTION_PICK,
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        ), EditPhotoActivity.REQUEST_CODE_PICK_PHOTO
-    )
-
-//    fun onSubmit(view: View) =
-//        ApiClient.photoService.createPlace(photo.value!!).enqueue(MyCallback<Photo> {
-//            (view.context as Activity).finish()
-//        })
+    fun onSelectPhoto(view: View) {
+        Log.d("onSelectPhoto", "hi")
+        (view.context as Activity).startActivityForResult(
+            Intent(
+                Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            ), MainActivity.REQUEST_CODE_PICK_PHOTO
+        )
+    }
 }

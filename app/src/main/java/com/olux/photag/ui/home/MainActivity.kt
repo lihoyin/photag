@@ -1,31 +1,41 @@
 package com.olux.photag.ui.home
 
+import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import com.olux.photag.R
-import com.olux.photag.models.Photo
-import com.olux.photag.repositories.ApiClient
-import com.olux.photag.repositories.MyCallback
-import com.olux.photag.ui.editPhoto.EditPhotoActivity
+import com.olux.photag.databinding.ActivityMainBinding
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+    companion object {
+        const val REQUEST_CODE_PICK_PHOTO = 1
+    }
+
+    private val viewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        ApiClient.photoService.getPhotos()
-            .enqueue(MyCallback<List<Photo>> {
-                Log.d("test", "photo list size: " + it.size)
-            })
+        DataBindingUtil
+            .setContentView<ActivityMainBinding>(this, R.layout.activity_main)
+            .apply { lifecycleOwner = this@MainActivity }
 
-        fab.setOnClickListener { startActivity(Intent(this, EditPhotoActivity::class.java)) }
+        recyclerView.adapter = PhotosAdapter()
+        swipeRefreshLayout.setOnRefreshListener(viewModel::retrievePhotoList)
+        fab.setOnClickListener(viewModel::onSelectPhoto)
+
+        viewModel.photos.observe(this, Observer { (recyclerView.adapter as PhotosAdapter).setPhotos(it) })
+        viewModel.isLoading.observe(this, Observer { swipeRefreshLayout.isRefreshing = it })
+        viewModel.retrievePhotoList()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -37,6 +47,16 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, photoReturnedIntent: Intent?) {
+        super.onActivityResult(requestCode, resultCode, photoReturnedIntent)
+        when (requestCode) {
+            REQUEST_CODE_PICK_PHOTO -> if (resultCode == Activity.RESULT_OK) {
+                val selectedPhoto: Uri? = photoReturnedIntent!!.data
+                viewModel.doUploadPhoto(this, selectedPhoto!!)
+            }
         }
     }
 }
