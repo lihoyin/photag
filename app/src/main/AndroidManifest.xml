@@ -32,6 +32,8 @@
         <activity
             android:name=".ui.photoDetail.PhotoDetailActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity android:name=".ui.login.LoginActivity" />
     </application>
 
 </manifest>
