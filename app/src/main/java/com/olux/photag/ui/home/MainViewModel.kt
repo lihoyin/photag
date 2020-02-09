@@ -13,6 +13,7 @@ import com.olux.photag.models.Photo
 import com.olux.photag.repositories.ApiClient
 import com.olux.photag.repositories.MyCallback
 import com.olux.photag.utils.PhotoHelper
+import com.olux.photag.utils.PrefHelper
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -46,13 +47,10 @@ class MainViewModel : ViewModel() {
         })
     }
 
-    fun onSelectPhoto(view: View) {
-        Log.d("onSelectPhoto", "hi")
-        (view.context as Activity).startActivityForResult(
+    fun onSelectPhoto(view: View) = (view.context as Activity).startActivityForResult(
             Intent(
                 Intent.ACTION_PICK,
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI
             ), MainActivity.REQUEST_CODE_PICK_PHOTO
         )
-    }
 }

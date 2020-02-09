@@ -4,12 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import com.olux.photag.MyApp
 import com.olux.photag.R
 import com.olux.photag.databinding.ActivityMainBinding
 import kotlinx.android.synthetic.main.activity_main.*
@@ -32,22 +31,14 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = PhotosAdapter()
         swipeRefreshLayout.setOnRefreshListener(viewModel::retrievePhotoList)
         fab.setOnClickListener(viewModel::onSelectPhoto)
+        btnLogout.setOnClickListener { MyApp.instance.logout() }
 
-        viewModel.photos.observe(this, Observer { (recyclerView.adapter as PhotosAdapter).setPhotos(it) })
+        viewModel.photos.observe(
+            this,
+            Observer { (recyclerView.adapter as PhotosAdapter).setPhotos(it) })
         viewModel.isLoading.observe(this, Observer { swipeRefreshLayout.isRefreshing = it })
+
         viewModel.retrievePhotoList()
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, photoReturnedIntent: Intent?) {
